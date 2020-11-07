@@ -30,8 +30,8 @@ func main() {
 }
 
 func parseModGraph(r io.Reader) (*Graph, error) {
+	nodes := map[string]*Node{}
 	edges := []*Edge{}
-	nodes := map[string]*Node{} // use temporary map to prevent duplication
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
