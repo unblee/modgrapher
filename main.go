@@ -10,7 +10,7 @@ import (
 
 type Graph struct {
 	// The order of node and edge doesn't matter.
-	Nodes []*Node
+	Nodes map[string]*Node // key is Node.ID
 	Edges []*Edge
 }
 
@@ -31,7 +31,7 @@ func main() {
 
 func parseModGraph(r io.Reader) (*Graph, error) {
 	edges := []*Edge{}
-	nodeMap := map[string]*Node{} // use temporary map to prevent duplication
+	nodes := map[string]*Node{} // use temporary map to prevent duplication
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
@@ -42,7 +42,7 @@ func parseModGraph(r io.Reader) (*Graph, error) {
 			return nil, fmt.Errorf("the content contains a invalid line: %w", err)
 		}
 
-		parentNode, ok := nodeMap[parentName]
+		parentNode, ok := nodes[parentName]
 		if !ok {
 			// Initialize a parent node.
 			parentNode = &Node{
@@ -51,11 +51,11 @@ func parseModGraph(r io.Reader) (*Graph, error) {
 				ParentIDs: map[string]struct{}{},
 				ChildIDs:  map[string]struct{}{},
 			}
-			nodeMap[parentName] = parentNode
+			nodes[parentName] = parentNode
 		}
 		parentNode.ChildIDs[childName] = struct{}{}
 
-		childNode, ok := nodeMap[childName]
+		childNode, ok := nodes[childName]
 		if !ok {
 			// Initialize a child node.
 			childNode = &Node{
@@ -64,7 +64,7 @@ func parseModGraph(r io.Reader) (*Graph, error) {
 				ParentIDs: map[string]struct{}{},
 				ChildIDs:  map[string]struct{}{},
 			}
-			nodeMap[childName] = childNode
+			nodes[childName] = childNode
 		}
 		childNode.ParentIDs[parentName] = struct{}{}
 
@@ -72,11 +72,6 @@ func parseModGraph(r io.Reader) (*Graph, error) {
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("failed to scan the content: %w", err)
-	}
-
-	nodes := []*Node{}
-	for _, node := range nodeMap {
-		nodes = append(nodes, node)
 	}
 
 	return &Graph{

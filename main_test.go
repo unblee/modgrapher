@@ -29,14 +29,14 @@ B F
 C F
 D G`)},
 			want: &Graph{
-				Nodes: []*Node{
-					{ID: "A", Label: "A", ParentIDs: map[string]struct{}{}, ChildIDs: map[string]struct{}{"B": {}, "C": {}, "D": {}}},
-					{ID: "B", Label: "B", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"E": {}, "F": {}}},
-					{ID: "C", Label: "C", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"F": {}}},
-					{ID: "D", Label: "D", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"G": {}}},
-					{ID: "E", Label: "E", ParentIDs: map[string]struct{}{"B": {}}, ChildIDs: map[string]struct{}{}},
-					{ID: "F", Label: "F", ParentIDs: map[string]struct{}{"B": {}, "C": {}}, ChildIDs: map[string]struct{}{}},
-					{ID: "G", Label: "G", ParentIDs: map[string]struct{}{"D": {}}, ChildIDs: map[string]struct{}{}},
+				Nodes: map[string]*Node{
+					"A": {ID: "A", Label: "A", ParentIDs: map[string]struct{}{}, ChildIDs: map[string]struct{}{"B": {}, "C": {}, "D": {}}},
+					"B": {ID: "B", Label: "B", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"E": {}, "F": {}}},
+					"C": {ID: "C", Label: "C", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"F": {}}},
+					"D": {ID: "D", Label: "D", ParentIDs: map[string]struct{}{"A": {}}, ChildIDs: map[string]struct{}{"G": {}}},
+					"E": {ID: "E", Label: "E", ParentIDs: map[string]struct{}{"B": {}}, ChildIDs: map[string]struct{}{}},
+					"F": {ID: "F", Label: "F", ParentIDs: map[string]struct{}{"B": {}, "C": {}}, ChildIDs: map[string]struct{}{}},
+					"G": {ID: "G", Label: "G", ParentIDs: map[string]struct{}{"D": {}}, ChildIDs: map[string]struct{}{}},
 				},
 				Edges: []*Edge{
 					{From: "A", To: "B"},
@@ -65,9 +65,9 @@ D G`)},
 				return
 			}
 
-			// The order of node and edge doesn't matter.
-			sortNodesEdges(tt.want)
-			sortNodesEdges(got)
+			// The order of edges doesn't matter.
+			sortEdges(tt.want)
+			sortEdges(got)
 
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("ParseModGraph() mismatch (-want +got):\n%s", diff)
@@ -76,11 +76,10 @@ D G`)},
 	}
 }
 
-func sortNodesEdges(g *Graph) {
+func sortEdges(g *Graph) {
 	if g == nil {
 		return
 	}
-	sort.SliceStable(g.Nodes, func(i, j int) bool { return g.Nodes[i].ID < g.Nodes[j].ID })
 	sort.SliceStable(g.Edges, func(i, j int) bool { return g.Edges[i].From < g.Edges[j].From })
 }
 
